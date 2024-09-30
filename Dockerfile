@@ -13,7 +13,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Run the build process (if applicable)
-RUN npm run build -- --verbose  # Added verbose logging
+RUN npm run build
 
 # Stage 2: Production
 FROM node:20-alpine3.18
