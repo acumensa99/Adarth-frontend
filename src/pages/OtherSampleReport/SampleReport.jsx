@@ -11,7 +11,6 @@ import {
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Loader } from 'react-feather';
-import 'react-datepicker/dist/react-datepicker.css';
 import classNames from 'classnames';
 import {
   useBookingReportByRevenueGraph,
