@@ -13,7 +13,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Run the build process (if applicable)
-RUN npm run build
+RUN npm run build -- --verbose  # Added verbose logging
 
 # Stage 2: Production
 FROM node:20-alpine3.18
@@ -21,7 +21,7 @@ FROM node:20-alpine3.18
 WORKDIR /app
 
 # Copy only necessary files from the builder stage
-COPY --from=builder /app ./
+COPY --from=builder /app ./  # You may need to specify particular folders (e.g., dist)
 
 # Start the application without pruning
 CMD ["npm", "run", "start"]
