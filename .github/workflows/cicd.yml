@@ -39,4 +39,4 @@ jobs:
         run: docker rm -f adarth-client-frontend-container || true 
         
       - name: Run docker container
-        run: docker run -d -p 8080:5173 --name adarth-client-frontend-container acumensa99/adarth-api-on-client-frontend:latest
+        run: docker run -d -p 8080:4173 --name adarth-client-frontend-container acumensa99/adarth-api-on-client-frontend:latest
