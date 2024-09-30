@@ -21,7 +21,7 @@ FROM node:20-alpine3.18
 WORKDIR /app
 
 # Copy only necessary files from the builder stage
-COPY --from=builder /app ./  # You may need to specify particular folders (e.g., dist)
+COPY --from=builder /app ./
 
 # Start the application without pruning
 CMD ["npm", "run", "start"]
