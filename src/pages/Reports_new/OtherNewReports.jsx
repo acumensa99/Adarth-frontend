@@ -38,7 +38,6 @@ import {
   useBookingRevenueByIndustry,
 } from '../../apis/queries/booking.queries';
 
-import { Download } from 'react-feather';
 import { downloadExcel } from '../../apis/requests/report.requests';
 import { useDownloadExcel } from '../../apis/queries/report.queries';
 import { showNotification } from '@mantine/notifications';
@@ -47,6 +46,7 @@ import ViewByFilter from '../../components/modules/reports/ViewByFilter';
 import { DATE_FORMAT } from '../../utils/constants';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 dayjs.extend(quarterOfYear);
+
 import {
   Chart as ChartJS,
   ArcElement,
@@ -371,7 +371,7 @@ const combinedChartOptions = useMemo(() => ({
           },
           beginAtZero: true,
           position: 'left',
-          max: Math.max(...salesData.map(d => Math.max(d.year2021, d.year2022, d.year2023))) + 5, // Adjust max value
+          max: Math.max(...salesData.map(d => Math.max(d.year2021, d.year2022, d.year2023))) + 20, // Adjust max value
       },
   },
   plugins: {
@@ -1196,27 +1196,75 @@ const combinedChartOptions = useMemo(() => ({
     }
   }, [revenueGraphData, groupBy]);
 
+  
+  const filterBookingDataByDate = useCallback(() => {
+    if (!bookingData || !Array.isArray(bookingData.docs)) {
+      return [];
+    }
+  
+    const start = dayjs(startDate, DATE_FORMAT);
+    const end = dayjs(endDate, DATE_FORMAT);
+  
+    const filteredBookings = bookingData.docs.filter((booking) => {
+      const bookingDate = dayjs(booking.createdAt);
+      const isWithinRange = bookingDate.isBetween(start, end, 'day', '[]');
+     
+      return isWithinRange;
+    });
+
+    return filteredBookings;
+  }, [bookingData, startDate, endDate]);
+  
   const handleUpdatedReveueByIndustry = useCallback(() => {
+    const filteredData = filterBookingDataByDate();
+  
+    if (filteredData.length === 0) {
+      setUpdatedIndustry(prevState => ({
+        ...prevState,
+        labels: [],
+        datasets: [{ ...prevState.datasets[0], data: [] }],
+      }));
+      return;
+    }
+  
+    const industryRevenueMap = filteredData.reduce((acc, booking) => {
+      const industryName = booking?.campaign?.industry?.name; // Don't assign 'Unknown Industry'
+      const totalAmount = booking?.totalAmount || 0;
+  
+      // Skip if the industry name is undefined or if the total amount is 0
+      if (!industryName || totalAmount === 0) {
+        return acc;
+      }
+  
+      if (!acc[industryName]) {
+        acc[industryName] = 0;
+      }
+      acc[industryName] += totalAmount;
+  
+      return acc;
+    }, {});
+  
+    // Convert the amounts to lacs
+    const industryRevenueInLacs = Object.fromEntries(
+      Object.entries(industryRevenueMap).map(([industry, revenue]) => [industry, revenue / 100000])
+    );
+  
     const tempBarData = {
-      labels: [],
+      labels: Object.keys(industryRevenueInLacs),
       datasets: [
         {
-          label: 'Revenue by Industry',
-          data: [],
+          label: 'Revenue by Industry (in Lacs)',
+          data: Object.values(industryRevenueInLacs),
           ...barDataConfigByIndustry.styles,
         },
       ],
     };
-
-    if (revenueDataByIndustry) {
-      revenueDataByIndustry.forEach((item, index) => {
-        tempBarData.labels.push(item._id);
-        tempBarData.datasets[0].data.push(Number(item.total) || 0);
-      });
-      setUpdatedIndustry(tempBarData);
-    }
-  }, [revenueDataByIndustry]);
-
+  
+    setUpdatedIndustry(tempBarData);
+  }, [filterBookingDataByDate]);
+  
+  
+  
   useEffect(() => {
     handleUpdateRevenueGraph();
   }, [revenueGraphData, groupBy]);
@@ -1232,11 +1280,11 @@ const combinedChartOptions = useMemo(() => ({
   const { data: bookingData2 } = useBookingsNew(searchParams.toString());
 
   const additionalTagsQuery = useDistinctAdditionalTags();
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState(['best', 'ASTC']);
   const [startDate1, setStartDate1] = useState(null);
   const [endDate1, setEndDate1] = useState(null);
-  const [filter3, setFilter3] = useState('');
-  const [activeView3, setActiveView3] = useState('');
+  const [filter3, setFilter3] = useState('currentYear');
+  const [activeView3, setActiveView3] = useState('currentYear');
   const today = new Date();
   const threeMonthsAgo = new Date();
   threeMonthsAgo.setMonth(today.getMonth() - 3);
@@ -1340,33 +1388,39 @@ const combinedChartOptions = useMemo(() => ({
 
     return groupedData;
   }, [bookingData2, selectedTags, filter3, startDate1, endDate1]);
-
   const chartData3 = useMemo(() => {
     const selectedData = transformedData3 || {};
-
+  
     if (!selectedData || Object.keys(selectedData).length === 0) {
       return {
         labels: [],
         datasets: [],
       };
     }
-
+  
     let labels = Object.keys(selectedData);
-
+  
+    // Define the fiscal year month order (April to March)
+    const fiscalMonthLabels = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+  
+    // Adjust the labels based on filter3
     if (filter3 === 'quarter') {
       labels = ['First Quarter', 'Second Quarter', 'Third Quarter', 'Fourth Quarter'];
+    } else if (filter3 === 'previousYear' || filter3 === 'currentYear') {
+      // For fiscal years, reorder the months to start from April
+      labels = fiscalMonthLabels;
     }
-
+  
     const datasets = selectedTags.map((tag, index) => {
       const data = labels.map(label => {
         const tagRevenue = selectedData[label]?.[tag] || 0;
         return tagRevenue > 0 ? tagRevenue / 100000 : 0;
       });
-
+  
       const hue = ((index * 360) / selectedTags.length) % 360;
       const color = `hsl(${hue}, 70%, 50%)`;
       const colorRGBA = `hsla(${hue}, 70%, 50%, 0.2)`;
-
+  
       return {
         label: ` ${tag} `,
         data,
@@ -1375,7 +1429,7 @@ const combinedChartOptions = useMemo(() => ({
         tension: 0.1,
       };
     });
-
+  
     return {
       labels,
       datasets,
@@ -1437,11 +1491,11 @@ const combinedChartOptions = useMemo(() => ({
   };
 
   const handleReset3 = () => {
-    setFilter3('');
-    setActiveView3('');
+    setFilter3('currentYear');
+    setActiveView3('currentYear');
     setStartDate1(null);
     setEndDate1(null);
-    setSelectedTags([]);
+    setSelectedTags(['best', 'ASTC']);
   };
 
   const handleMenuItemClick3 = value => {
@@ -1636,12 +1690,12 @@ const combinedChartOptions = useMemo(() => ({
   }, [filter3, currentYear, startDate1, endDate1]);
   // tagwise report
 
-  // media type wise
-  const [filter4, setFilter4] = useState('');
-  const [activeView4, setActiveView4] = useState('');
+  // category type wise
+  const [filter4, setFilter4] = useState('currentYear');
+  const [activeView4, setActiveView4] = useState('currentYear');
   const [secondFilter, setSecondFilter] = useState('category');
   const [categoryList, setCategoryList] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Billboard');
   
   useEffect(() => {
     if (bookingData2) {
@@ -1666,7 +1720,6 @@ const combinedChartOptions = useMemo(() => ({
   const transformedData4 = useMemo(() => {
     if (!bookingData2 || !secondFilter || !selectedCategory) return {};
   
-    console.log('Filtering for:', selectedCategory, 'with filter:', filter4);
   
     const past7DaysRange = generatePast7Days(); // Ensure it returns dates in 'MM/DD/YYYY' format
     const currentYear = new Date().getFullYear();
@@ -1680,7 +1733,7 @@ const combinedChartOptions = useMemo(() => ({
   
         campaign.spaces.forEach(space => {
           const category = space.basicInformation?.category?.[0]?.name;
-          const subCategory = space.basicInformation?.subCategory?.name || 'Others';  
+          const subCategory = space.basicInformation?.subCategory?.name || 'Other Subcategory';  
           const date = new Date(detail.createdAt);
           const year = date.getFullYear();
           const month = date.getMonth();
@@ -1731,8 +1784,6 @@ const combinedChartOptions = useMemo(() => ({
       });
       return acc;
     }, {});
-  
-    console.log('Grouped Data:', groupedData);
   
     return groupedData;
   }, [bookingData2, filter4, secondFilter, selectedCategory, startDate1, endDate1]);
@@ -1800,6 +1851,39 @@ const combinedChartOptions = useMemo(() => ({
           },
         },
       },
+      plugins: {
+        datalabels: {
+          display: true,
+          anchor: 'end',
+          align: 'end',
+          formatter: (value, context) => {
+            // Removing the context.dataset.type condition to ensure it works for Bar charts
+            if (value > 0) {
+              return `${value.toFixed(0)}`; // Format the value as "X.XX L"
+            }
+            return ''; // Do not show labels for 0 or trend line
+          },
+          color: '#000', // Label color
+          font: {
+            weight: 'light',
+            size: 12, // Increase the size for visibility
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: context => {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += `${context.parsed.y.toFixed(2)} L`; // Tooltip formatting with two decimal places
+              }
+              return label;
+            },
+          },
+        },
+      },
     }),
     [filter4, transformedData4, secondFilter],
   );
@@ -1810,10 +1894,10 @@ const combinedChartOptions = useMemo(() => ({
   };
 
   const handleReset4 = () => {
-    setFilter4('');
-    setActiveView4('');
-    setSecondFilter('');
-    setSelectedCategory('');
+    setFilter4('currentYear');
+    setActiveView4('currentYear');
+    setSecondFilter('category');
+    setSelectedCategory('Billboard');
     setStartDate1(null);
     setEndDate1(null);
     setCategoryList([]);  // Trigger chart re-render
@@ -1824,7 +1908,7 @@ const combinedChartOptions = useMemo(() => ({
     setFilter4(value);
     setActiveView4(value);
   };
-  // media type wise
+  // category type wise
 
   // excel
   const { mutateAsync, isLoading: isDownloadLoading } = useDownloadExcel();
@@ -2006,14 +2090,15 @@ const combinedChartOptions = useMemo(() => ({
       </div>
       <div className={classNames('overflow-y-auto px-5 col-span-10 overflow-x-hidden')}>
           <div className="my-6 w-[60rem]" id="revenue-pdf">
-            <div className="h-[60px] border-b my-5 border-gray-450 flex ">
-              <ViewByFilter handleViewBy={handleRevenueGraphViewBy} />
-            </div>
+          
             <div className="flex gap-8">
               <div className="w-[70%] flex flex-col justify-between min-h-[300px]">
                 <div className="flex justify-between items-center">
                   <p className="font-bold">Revenue Graph</p>
                 </div>
+                <div className="h-[60px] mt-5 border-gray-450 flex ">
+              <ViewByFilter handleViewBy={handleRevenueGraphViewBy} />
+            </div>
                 {isRevenueGraphLoading ? (
                   <Loader className="m-auto" />
                 ) : (
@@ -2033,9 +2118,9 @@ const combinedChartOptions = useMemo(() => ({
                   </div>
                 )}
               </div>
-              <div className="w-[30%] flex flex-col">
+              <div className="w-[30%] flex flex-col mt-10">
                 <div className="flex justify-between items-start">
-                  <p className="font-bold">Industry wise revenue graph</p>
+                  <p className="font-bold ml-9">Industry wise revenue graph</p>
                 </div>
                 <div className="w-80 m-auto">
                   {isByIndustryLoading ? (
@@ -2118,7 +2203,7 @@ const combinedChartOptions = useMemo(() => ({
           )}
 
           <div className=" my-4">
-            <Bar data={chartData4} options={chartOptions4} />
+            <Bar  ref={chartRef} data={chartData4} options={chartOptions4}  plugins={[ChartDataLabels]}/>
           </div>
         </div>
         
