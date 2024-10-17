@@ -23,7 +23,7 @@ jobs:
         run: docker build -t acumensa99/adarth-api-on-client-frontend:latest .
 
       - name: Login to docker hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Publish image to docker hub
         run: docker push acumensa99/adarth-api-on-client-frontend:latest
@@ -33,10 +33,10 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull image from docker hub
-        run: sudo docker pull acumensa99/adarth-api-on-client-frontend:latest 
+        run: docker pull acumensa99/adarth-api-on-client-frontend:latest 
         
       - name: Delete old container
-        run: sudo docker rm -f adarth-client-frontend-container || true 
-      
+        run: docker rm -f adarth-client-frontend-container || true 
+        
       - name: Run docker container
-        run: sudo docker run -d -p 8080:4173 --name adarth-client-frontend-container acumensa99/adarth-api-on-client-frontend:latest
+        run: docker run -d -p 8080:4173 --name adarth-client-frontend-container acumensa99/adarth-api-on-client-frontend:latest
