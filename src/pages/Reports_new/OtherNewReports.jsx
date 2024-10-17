@@ -1943,8 +1943,8 @@ const combinedChartOptions = useMemo(() => ({
   // report download
   const { mutateAsync, isLoading: isDownloadLoading } = useShareReport();
   const handleDownloadPdf = async () => {
-    const activeUrl = new URL(window.location.href);
-    activeUrl.searchParams.append('share', 'report');
+    const activeUrl = "http://ec2-13-235-24-169.ap-south-1.compute.amazonaws.com:8080/reports/campaign?share=report";
+    // activeUrl.searchParams.append('share', 'report');
 
     await mutateAsync(
       { url: activeUrl.toString() },
