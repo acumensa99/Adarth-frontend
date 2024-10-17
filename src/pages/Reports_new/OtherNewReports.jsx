@@ -14,13 +14,12 @@ import {
   quarters,
   serialize,
   timeLegend,
-  downloadPdf,
 } from '../../utils';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import { useInfiniteCompanies } from '../../apis/queries/companies.queries';
 import useUserStore from '../../store/user.store';
-import { Download, Loader } from 'react-feather';
+import { Loader } from 'react-feather';
 import { useSearchParams } from 'react-router-dom';
 import { useFetchMasters } from '../../apis/queries/masters.queries';
 import { useFetchOperationalCostData } from '../../apis/queries/operationalCost.queries';
@@ -40,7 +39,7 @@ import {
 } from '../../apis/queries/booking.queries';
 
 import { downloadExcel } from '../../apis/requests/report.requests';
-import { useDownloadExcel, useShareReport } from '../../apis/queries/report.queries';
+import { useDownloadExcel } from '../../apis/queries/report.queries';
 import { showNotification } from '@mantine/notifications';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import ViewByFilter from '../../components/modules/reports/ViewByFilter';
@@ -1912,42 +1911,13 @@ const combinedChartOptions = useMemo(() => ({
   // category type wise
 
   // excel
-  // const { mutateAsync, isLoading: isDownloadLoading } = useDownloadExcel();
+  const { mutateAsync, isLoading: isDownloadLoading } = useDownloadExcel();
 
-  // const handleDownloadExcel = async () => {
-  //   const activeUrl = new URL(window.location.href);
-
-  //   await mutateAsync(
-  //     { s3url: activeUrl.toString() },
-  //     {
-  //       onSuccess: data => {
-  //         showNotification({
-  //           title: 'Report has been downloaded successfully',
-  //           color: 'green',
-  //         });
-  //         if (data?.link) {
-  //           downloadExcel(data.link);
-  //         }
-  //       },
-  //       onError: err => {
-  //         showNotification({
-  //           title: err?.message,
-  //           color: 'red',
-  //         });
-  //       },
-  //     },
-  //   );
-  // };
-  // excel
-
-  // report download
-  const { mutateAsync, isLoading: isDownloadLoading } = useShareReport();
-  const handleDownloadPdf = async () => {
-    const activeUrl = "http://ec2-13-235-24-169.ap-south-1.compute.amazonaws.com:8080/reports/campaign?share=report";
-    // activeUrl.searchParams.append('share', 'report');
+  const handleDownloadExcel = async () => {
+    const activeUrl = new URL(window.location.href);
 
     await mutateAsync(
-      { url: activeUrl.toString() },
+      { s3url: activeUrl.toString() },
       {
         onSuccess: data => {
           showNotification({
@@ -1955,14 +1925,19 @@ const combinedChartOptions = useMemo(() => ({
             color: 'green',
           });
           if (data?.link) {
-            downloadPdf(data.link);
+            downloadExcel(data.link);
           }
+        },
+        onError: err => {
+          showNotification({
+            title: err?.message,
+            color: 'red',
+          });
         },
       },
     );
   };
-
-  // report download
+  // excel
 
   // existing campaing card
   const { data: stats, isLoading: isStatsLoading } = useCampaignStats();
@@ -1997,15 +1972,6 @@ const combinedChartOptions = useMemo(() => ({
 
   return (
     <div className="overflow-y-auto p-3 col-span-10 overflow-hidden">
-     <Button
-          leftIcon={<Download size="20" color="white" />}
-          className="primary-button mx-3"
-          onClick={handleDownloadPdf}
-          loading={isDownloadLoading}
-          disabled={isDownloadLoading}
-        >
-          Download
-        </Button>
       {/* <div className="flex justify-between ">
     <div className="overflow-y-auto px-3 col-span-10 overflow-hidden">
       <div className="flex justify-between ">
