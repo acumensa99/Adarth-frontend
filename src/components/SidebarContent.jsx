@@ -131,12 +131,12 @@ const SidebarContent = ({ className }) => {
         icon: ReportIcon,
         acceptedRoles: [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.SUPERVISOR, ROLES.ASSOCIATE],
       },
-      {
-        label: 'Ranking_report',
-        path: '/performanceReport',
-        icon: ReportIcon,
-        acceptedRoles: [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.SUPERVISOR, ROLES.ASSOCIATE],
-      },
+      // {
+      //   label: 'Ranking_report',
+      //   path: '/performanceReport',
+      //   icon: ReportIcon,
+      //   acceptedRoles: [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.SUPERVISOR, ROLES.ASSOCIATE],
+      // },
       // {
       //   label: 'TagWise_repo',
       //   path: '/tagsWiseReport',

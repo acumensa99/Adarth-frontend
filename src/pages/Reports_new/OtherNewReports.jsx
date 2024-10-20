@@ -2019,12 +2019,12 @@ const combinedChartOptions = useMemo(() => ({
           </Button>
         </div>
       </div> */}
-      <div className="border-2 p-5 border-black">
+      {/* <div className="border-2 p-5 border-black"> */}
         <p className="font-bold text-lg"> Revenue </p>
         <div className="overflow-hidden p-5 ">
           <RevenueCards />
         </div>
-        <div className="flex flex-col md:flex-row">
+        {/* <div className="flex flex-col md:flex-row">
           <div className="flex flex-col p-6 w-[30rem]">
             <p className="font-bold text-center">Source Distribution</p>
             <p className="text-sm text-gray-600 italic pt-3">
@@ -2118,8 +2118,8 @@ const combinedChartOptions = useMemo(() => ({
         <div className="my-4">
           <Line data={chartData1} options={chartOptions1} />
         </div>
-      </div>
-      <div className={classNames('overflow-y-auto px-5 col-span-10 overflow-x-hidden')}>
+      </div> */}
+      {/* <div className={classNames('overflow-y-auto px-5 col-span-10 overflow-x-hidden')}>
           <div className="my-6 w-[60rem]" id="revenue-pdf">
           
             <div className="flex gap-8">
@@ -2149,7 +2149,7 @@ const combinedChartOptions = useMemo(() => ({
                   </div>
                 )}
               </div>
-              {/* <div className="w-[30%] flex flex-col mt-10">
+              <div className="w-[30%] flex flex-col mt-10">
                 <div className="flex justify-between items-start">
                   <p className="font-bold ml-9">Industry wise revenue graph</p>
                 </div>
@@ -2166,10 +2166,10 @@ const combinedChartOptions = useMemo(() => ({
                     />
                   )}
                 </div>
-              </div> */}
+              </div>
             </div>
           </div>
-      </div>
+      </div> */}
 
         {/* <div className="flex flex-col md:flex-row  w-[60rem] px-4">
         <div className="pt-6 w-[40rem]">
@@ -2241,7 +2241,7 @@ const combinedChartOptions = useMemo(() => ({
       </div> */}
        
         
-      </div>
+      {/* </div> */}
       {/* <div className="flex p-6 flex-col ">
         <div className="flex justify-between items-center">
           <p className="font-bold">Sales Report</p>
