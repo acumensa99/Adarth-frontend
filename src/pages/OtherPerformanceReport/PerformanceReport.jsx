@@ -6,12 +6,34 @@ import { useModals } from '@mantine/modals';
 import { useFetchInventoryReportList } from '../../apis/queries/inventory.queries';
 import PerformanceCard from '../../components/modules/newReports/performanceCard';
 import RowsPerPage from '../../components/RowsPerPage';
-import { categoryColors, generateSlNo } from '../../utils';
+import { categoryColors, downloadPdf, generateSlNo } from '../../utils';
 import SpaceNamePhotoContent from '../../components/modules/inventory/SpaceNamePhotoContent';
-import { Badge } from '@mantine/core';
+import { Badge, Button } from '@mantine/core';
+import { Download } from 'react-feather';
+import { useShareReport } from '../../apis/queries/report.queries';
+import { showNotification } from '@mantine/notifications';
 
 const PerformanceReport = () => {
- 
+  const { mutateAsync, isLoading: isDownloadLoading } = useShareReport();
+  const handleDownloadPdf = async () => {
+    const activeUrl = new URL(window.location.href);
+    activeUrl.searchParams.append('share', 'report');
+
+    await mutateAsync(
+      { url: activeUrl.toString() },
+      {
+        onSuccess: data => {
+          showNotification({
+            title: 'Report has been downloaded successfully',
+            color: 'green',
+          });
+          if (data?.link) {
+            downloadPdf(data.link);
+          }
+        },
+      },
+    );
+  };
   const modals = useModals();
   const [searchParams1, setSearchParams1] = useSearchParams({
     limit: 20,
@@ -139,7 +161,17 @@ const PerformanceReport = () => {
   };
   return (
     <div className="overflow-y-auto p-5 col-span-10 w-[65rem]">
-      
+      <div className="py-5 flex items-start">
+       <Button
+          leftIcon={<Download size="20" color="white" />}
+          className="primary-button"
+          onClick={handleDownloadPdf}
+          loading={isDownloadLoading}
+          disabled={isDownloadLoading}
+        >
+          Download
+        </Button>
+        </div>
       <p className="font-bold pt-6">Performance Ranking Report</p>
       <p className="text-sm text-gray-600 italic pt-2">
         This report shows Performance Cards with pagination controls and a sortable, paginated
