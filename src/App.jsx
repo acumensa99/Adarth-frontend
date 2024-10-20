@@ -25,8 +25,7 @@ import ViewContactPage from './pages/RepositoryPage/ViewContactPage';
 import LeadsPage from './pages/LeadsPage';
 import LeadsDashboardPage from './pages/LeadsPage/LeadsDashboardPage';
 import AddLeadPage from './pages/LeadsPage/AddLeadPage';
-import Reports_new from './pages/Reports_new';
-import OtherNewReports from './pages/Reports_new/OtherNewReports';
+import ReportsNewPage from './pages/ReportsNewPage';
 import OtherPerformanceReport from './pages/OtherPerformanceReport';
 import OtherTagsWiseReport from './pages/OtherTagsWiseReport';
 import OtherMediaReport from './pages/OtherMediaReport';
@@ -45,6 +44,7 @@ const CreateBulkInventoriesPage = lazy(() =>
 const InventoryDetailsPage = lazy(() => import('./pages/InventoryPage/InventoryDetailsPage'));
 
 const PerformanceReport = lazy(() => import('./pages/OtherPerformanceReport/PerformanceReport'));
+const OtherNewReports = lazy(() => import('./pages/ReportsNewPage/OtherNewReports'));
 const TagsWiseReport = lazy(() => import('./pages/OtherTagsWiseReport/TagsWiseReport'));
 const MediaWiseReport = lazy(() => import('./pages/OtherMediaReport/MediaWiseReport'));
 const SampleReport = lazy(() => import('./pages/OtherSampleReport/SampleReport'));
@@ -430,7 +430,7 @@ const App = () => {
           path="newReports"
           element={
             <Suspense fallback={<HeaderSidebarLoader />}>
-              <Reports_new />
+              <ReportsNewPage />
             </Suspense>
           }
         >
