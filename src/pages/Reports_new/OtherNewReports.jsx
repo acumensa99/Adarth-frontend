@@ -2149,7 +2149,7 @@ const combinedChartOptions = useMemo(() => ({
                   </div>
                 )}
               </div>
-              <div className="w-[30%] flex flex-col mt-10">
+              {/* <div className="w-[30%] flex flex-col mt-10">
                 <div className="flex justify-between items-start">
                   <p className="font-bold ml-9">Industry wise revenue graph</p>
                 </div>
@@ -2166,12 +2166,12 @@ const combinedChartOptions = useMemo(() => ({
                     />
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
       </div>
 
-        <div className="flex flex-col md:flex-row  w-[60rem] px-4">
+        {/* <div className="flex flex-col md:flex-row  w-[60rem] px-4">
         <div className="pt-6 w-[40rem]">
           <p className="font-bold "> Category Wise Filtered Revenue Report</p>
           <p className="text-sm text-gray-600 italic py-4">
@@ -2238,11 +2238,11 @@ const combinedChartOptions = useMemo(() => ({
           </div>
         </div>
         
-      </div>
+      </div> */}
        
         
       </div>
-      <div className="flex p-6 flex-col ">
+      {/* <div className="flex p-6 flex-col ">
         <div className="flex justify-between items-center">
           <p className="font-bold">Sales Report</p>
         </div>
@@ -2267,9 +2267,9 @@ const combinedChartOptions = useMemo(() => ({
             )}
           </div>
         )}
-      </div>
+      </div> */}
       
-      <div className="flex flex-col col-span-10 overflow-x-hidden">
+      {/* <div className="flex flex-col col-span-10 overflow-x-hidden">
         <div className="pt-6 w-[50rem] mx-10">
           <p className="font-bold ">Tag Wise Filtered Revenue Report</p>
           <p className="text-sm text-gray-600 italic py-4">
@@ -2277,7 +2277,6 @@ const combinedChartOptions = useMemo(() => ({
           </p>
           <div className="flex">
             <div>
-              {/* View By Dropdown */}
               <Menu shadow="md" width={130}>
                 <Menu.Target>
                   <Button className="secondary-button">
@@ -2335,7 +2334,7 @@ const combinedChartOptions = useMemo(() => ({
         <div className="col-span-12 md:col-span-12 lg:col-span-10 border-gray-450 mx-10  h-[400px]">
           <Table COLUMNS={tableColumns3} data={tableData3} showPagination={false} />
         </div>
-      </div>
+      </div> */}
 
       {/* <div className="col-span-12 md:col-span-12 lg:col-span-10 overflow-y-auto p-5">
         <p className="font-bold pt-10">Price and Traded Margin Report</p>
