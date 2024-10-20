@@ -257,18 +257,9 @@ const RevenueReportsPage = () => {
   const handleDownloadPdf = async () => {
     const activeUrl = new URL(window.location.href);
     activeUrl.searchParams.append('share', 'report');
-  
-    const payload = {
-      url: encodeURIComponent(activeUrl.toString()),  // Ensure URL is properly encoded
-      shareVia: 'email',  // Set as per your requirement
-      to: 'recipient@example.com',  // Use a valid email here
-      name: 'Revenue Report'  // Provide a meaningful name
-    };
-  
-    console.log('Payload:', payload);  // Debugging the payload
-  
+
     await mutateAsync(
-      payload,
+      { url: activeUrl.toString() },
       {
         onSuccess: data => {
           showNotification({
@@ -276,15 +267,13 @@ const RevenueReportsPage = () => {
             color: 'green',
           });
           if (data?.link) {
-            downloadPdf(data.link);  // Ensure downloadPdf works correctly
+            downloadPdf(data.link);
           }
         },
-        onError: (error) => {
-          console.error('Error details:', error?.data?.errors);  // Log exact server error details
-        }
       },
     );
   };
+
   
 
   const handleUpdateRevenueGraph = useCallback(() => {
