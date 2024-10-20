@@ -5,6 +5,7 @@ import LeadsList from '../../components/modules/leads/LeadsList';
 import LeadsStats from '../../components/modules/leads/LeadsStats';
 import { downloadPdf } from '../../utils';
 import { Button } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 
 const LeadsDashboardPage = () => {
   const leadStatsQuery = useLeadStats();
