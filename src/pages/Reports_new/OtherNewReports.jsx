@@ -1991,7 +1991,7 @@ const combinedChartOptions = useMemo(() => ({
     );
   };
   return (
-    <div className="overflow-y-auto p-3 col-span-10 overflow-hidden">
+    <div className="">
       <div className="py-5 flex items-start">
        <Button
           leftIcon={<Download size="20" color="white" />}
