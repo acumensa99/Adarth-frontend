@@ -2337,7 +2337,7 @@ const combinedChartOptions = useMemo(() => ({
         </div>
       </div>
 
-      <div className="col-span-12 md:col-span-12 lg:col-span-10 overflow-y-auto p-5">
+      {/* <div className="col-span-12 md:col-span-12 lg:col-span-10 overflow-y-auto p-5">
         <p className="font-bold pt-10">Price and Traded Margin Report</p>
         <p className="text-sm text-gray-600 italic py-4">
           This report provide insights into the pricing trends, traded prices, and margins grouped
@@ -2481,7 +2481,7 @@ const combinedChartOptions = useMemo(() => ({
           </div>
         </div>
       </div>
-      </div>
+      </div> */}
     </div>
   );
 };
