@@ -138,7 +138,7 @@ const SidebarContent = ({ className }) => {
       //   acceptedRoles: [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.SUPERVISOR, ROLES.ASSOCIATE],
       // },
       // {
-      //   label: 'TagWise_repo',
+      //   label: 'Client_Details',
       //   path: '/tagsWiseReport',
       //   icon: ReportIcon,
       //   acceptedRoles: [ROLES.ADMIN, ROLES.MANAGEMENT, ROLES.SUPERVISOR, ROLES.ASSOCIATE],

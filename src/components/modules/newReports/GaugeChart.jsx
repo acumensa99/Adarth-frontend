@@ -14,14 +14,14 @@ const drawNeedlePlugin = {
     const stepAngle = Math.PI / intervals; // Step angle for each interval
     const stepAmount = invoiceRaised / intervals; // Amount for each step (based on total invoiceRaised)
 
-    const cx = width / 1.7; // Center x
-    const cy = height * 0.82; // Adjust center y to be closer to the bottom of the chart
+    const cx = width / 1.68; // Center x
+    const cy = height * 0.93; // Adjust center y to be closer to the bottom of the chart
     const radius = height / 2.5; // Radius for the tick marks
 
     // Adjust the radius for tick marks and labels to be spaced properly
     const outerTickRadius = radius + 35; // Slightly reduce the outer radius to avoid overlapping
-    const innerTickRadius = radius + 20; // Adjust inner radius accordingly
-    const labelRadius = radius + 50; // Keep labels further from the chart
+    const innerTickRadius = radius + 30; // Adjust inner radius accordingly
+    const labelRadius = radius + 45; // Keep labels further from the chart
 
     ctx.save();
     for (let i = 0; i <= intervals; i++) {
@@ -131,7 +131,7 @@ const GaugeChart = ({ invoiceRaised, amountCollected }) => {
   };
 
   return (
-    <div className="w-[400px] overflow-x-auto overflow-y-hidden">
+    <div className="w-[350px] overflow-x-auto overflow-y-hidden">
       <Doughnut data={data} options={options} plugins={[drawNeedlePlugin]} />
       <div className="text-center">
         <p className="text-xs mt-[-70px]">{collectedPercentage.toFixed(2)}% Amount Collected</p>

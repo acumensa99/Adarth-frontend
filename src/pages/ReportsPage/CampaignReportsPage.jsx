@@ -261,7 +261,7 @@ const CampaignReportsPage = () => {
   const handleDownloadPdf = async () => {
     const activeUrl = new URL(window.location.href);
     activeUrl.searchParams.append('share', 'report');
-
+    console.log("active url", activeUrl)
     await mutateAsync(
       { url: activeUrl.toString() },
       {
@@ -273,10 +273,12 @@ const CampaignReportsPage = () => {
           if (data?.link) {
             downloadPdf(data.link);
           }
+          console.log("data", data)
         },
       },
     );
   };
+
 
   useEffect(() => {
     calculateBarData();

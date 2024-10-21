@@ -274,8 +274,6 @@ const RevenueReportsPage = () => {
     );
   };
 
-  
-
   const handleUpdateRevenueGraph = useCallback(() => {
     if (revenueGraphData) {
       const tempData = {
