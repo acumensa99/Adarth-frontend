@@ -78,6 +78,7 @@ const customLinesPlugin = {
 const barDataConfigByIndustry = {
   options: {
     responsive: true,
+    radius: '80%', // Shrinks the pie chart to add space around it
     plugins: {
       datalabels: {
         color: '#333',
@@ -422,7 +423,7 @@ const RevenueAndIndustriGraph = () => {
                   </p>
                 </div>
                 <div className="w-72 m-auto">
-                  {isByIndustryLoading ? (
+                  {isLoadingBookingData ? (
                     <Loader className="mx-auto" />
                   ) : !updatedIndustry.datasets[0].data.length ? (
                     <p className="text-center">NA</p>

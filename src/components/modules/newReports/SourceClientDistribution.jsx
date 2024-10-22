@@ -20,7 +20,9 @@ import {
   LogarithmicScale,
   Chart,
 } from 'chart.js';
-import { useBookingsNew } from '../../../apis/queries/booking.queries';
+import { useBookingsNew, useUserSalesByUserId } from '../../../apis/queries/booking.queries';
+import { financialEndDate, financialStartDate, monthsInShort } from '../../../utils';
+import useUserStore from '../../../store/user.store';
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -157,7 +159,7 @@ const SourceClientDistribution = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      radius: '80%',
+      // radius: '80%',
       plugins: {
         datalabels: {
           formatter: value => {
@@ -169,7 +171,17 @@ const SourceClientDistribution = () => {
           offset: 2,
           // This keeps the data labels unaffected by chart size adjustments
         },
+
       },
+      layout: {
+        padding: {
+          // top: 10,
+          bottom: 20,
+          left: 15,
+          right: 15,
+        },
+      },
+      
     },
   };
   const aggregatedData = useMemo(() => {
@@ -234,7 +246,7 @@ const SourceClientDistribution = () => {
         <p className="text-sm text-gray-600 italic">
           This chart shows the revenue split between "Own Sites" and "Traded Sites".
         </p>
-        <div className=" w-48">
+        <div className=" ">
           {isLoadingBookingData ? (
             <Loader className="mx-auto" />
           ) : (
