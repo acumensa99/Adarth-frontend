@@ -89,7 +89,7 @@ const RevenueCards = () => {
   ];
 
   return (
-    <div className="overflow-y-auto px-5 col-span-10 w-[65rem]">
+    <div className="overflow-y-auto px-5 pt-5 col-span-10 w-[65rem]">
       <p className="font-bold"> Revenue Cards</p>
       <p className="text-sm text-gray-600 italic py-4">
         This report shows total revenue Cards.

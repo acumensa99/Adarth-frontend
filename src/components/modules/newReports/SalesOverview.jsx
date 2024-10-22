@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { useBookingsNew } from '../../apis/queries/booking.queries';
 import { useSearchParams } from 'react-router-dom';
-import { Menu, Button, Loader } from '@mantine/core';
-import DateRangeSelector from '../../components/DateRangeSelector';
-import Table from '../../components/Table/Table';
+import { Menu, Button } from '@mantine/core';
+import { useBookingsNew } from '../../../apis/queries/booking.queries';
+import DateRangeSelector from '../../DateRangeSelector';
 import classNames from 'classnames';
 import { useTable } from 'react-table';
 const viewBy = {
@@ -23,7 +22,7 @@ const viewOptions = [
   { label: 'Custom Date Range', value: 'customDate' },
 ];
 
-const MediaWiseReport = () => {
+const SalesOverview = () => {
   const [searchParams] = useSearchParams({
     page: 1,
     limit: 1000,
@@ -553,7 +552,7 @@ const MediaWiseReport = () => {
       </div>
 
       {/* <div className="h-[400px] overflow-auto "> */}
-      <div className="min-h-[450px] flex flex-col justify-between px-5">
+      <div className="flex flex-col justify-between px-5">
         <div className="overflow-auto max-h-[400px]">
           <table className="w-full">
             <thead className="bg-gray-100 sticky top-0 z-10">
@@ -586,7 +585,7 @@ const MediaWiseReport = () => {
                   <React.Fragment key={index}>
                     <tr
                       className={classNames(
-                        'text-left border-l-0 hover:bg-gray-50',
+                        'text-left border-l-0 hover:bg-slate-100',
                         rowBackgroundClass,
                         row.original?.peerId && row.original.peerId !== userId && 'has-peer',
                         row.original.isActive === false ? 'opacity-50' : '',
@@ -623,4 +622,4 @@ const MediaWiseReport = () => {
   );
 };
 
-export default MediaWiseReport;
+export default SalesOverview;

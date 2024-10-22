@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useBookingsNew } from '../../apis/queries/booking.queries';
 import { useSearchParams } from 'react-router-dom';
-import { Menu, Button, Loader } from '@mantine/core';
+import { Menu, Button } from '@mantine/core';
 import DateRangeSelector from '../../components/DateRangeSelector';
 import Table from '../../components/Table/Table';
 import classNames from 'classnames';
-import { useTable } from 'react-table';
+
 const viewBy = {
   yearly: 'Yearly',
   halfYearly: 'Half Yearly',
@@ -23,7 +23,7 @@ const viewOptions = [
   { label: 'Custom Date Range', value: 'customDate' },
 ];
 
-const MediaWiseReport = () => {
+const MediaWiseReport2 = () => {
   const [searchParams] = useSearchParams({
     page: 1,
     limit: 1000,
@@ -120,15 +120,15 @@ const MediaWiseReport = () => {
 
   const prepareYearlyData = bookings => {
     const groupedData = {};
-  
+
     const clientTypes = ['Direct Client', 'Local Agency', 'National Agency', 'Government'];
-  
+
     const getFinancialYear = date => {
       const month = date.getMonth();
       const year = date.getFullYear();
       return month >= 3 ? year : year - 1;
     };
-  
+
     const getQuarter = monthIndex => {
       if (monthIndex >= 3 && monthIndex <= 5) {
         return 'First Quarter';
@@ -140,75 +140,99 @@ const MediaWiseReport = () => {
         return 'Fourth Quarter';
       }
     };
-  
+
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentFinYearStart = new Date(today.getFullYear(), 3, 1);
     const currentFinYearEnd = new Date(today.getFullYear() + 1, 2, 31);
-  
+
     const quarterlySummaries = {};
-  
+
     bookings.forEach(booking => {
       const createdAt = new Date(booking.createdAt);
-  
+
       if (createdAt > today) return;
-  
+
       const month = createdAt.getMonth();
       const year = getFinancialYear(createdAt);
       const clientType = booking?.client?.clientType || '-';
-  
+
       let periodKey = '';
       let groupingKey = '';
       const monthName = createdAt.toLocaleString('default', { month: 'long' });
-  
+
       switch (filter) {
         case 'yearly':
           if (createdAt < currentFinYearStart || createdAt > currentFinYearEnd) return;
-  
+
           const quarter = getQuarter(month);
           periodKey = `${monthName} ${year}`;
           groupingKey = `${month}-${year}`;
+
+          if (!quarterlySummaries[quarter]) {
+            quarterlySummaries[quarter] = {
+              ownedSiteRevenue: 0,
+              tradedSiteRevenue: 0,
+              totalRevenue: 0,
+              tradedMargin: 0,
+              clientType: '',
+              operationalCosts: { electricity: 0, licenseFee: 0, rental: 0, misc: 0 },
+              tradedPurchaseCost: 0,
+              grossRevenueOwned: 0,
+              grossRevenueTraded: 0,
+            };
+          }
           break;
-  
+
         case 'halfYearly': {
           if (createdAt < currentFinYearStart || createdAt > currentFinYearEnd) return;
-  
-          // Define the first and second half of the financial year
-          const firstHalfStart = new Date(today.getFullYear(), 3, 1); // April 1
-          const firstHalfEnd = new Date(today.getFullYear(), 8, 30); // September 30
-          const secondHalfStart = new Date(today.getFullYear(), 9, 1); // October 1
-          const secondHalfEnd = new Date(today.getFullYear() + 1, 2, 31); // March 31 of next year
-  
-          // Check which half the current month falls into
+
+          const firstHalfStart = new Date(today.getFullYear(), 3, 1);
+          const firstHalfEnd = new Date(today.getFullYear(), 8, 30);
+          const secondHalfStart = new Date(today.getFullYear(), 9, 1);
+          const secondHalfEnd = new Date(today.getFullYear() + 1, 2, 31);
+
           const isFirstHalf = currentMonth >= 3 && currentMonth <= 8;
           const isSecondHalf = currentMonth >= 9 || currentMonth <= 2;
-  
-          // Show only the current half where the current month lies
-          if (isFirstHalf) {
-            if (createdAt < firstHalfStart || createdAt > firstHalfEnd) return; // Ensure it's within first half dates
-          } else if (isSecondHalf) {
-            if (createdAt < secondHalfStart || createdAt > secondHalfEnd) return; // Ensure it's within second half dates
+
+          let halfYear = '';
+          if (isFirstHalf && createdAt >= firstHalfStart && createdAt <= firstHalfEnd) {
+            halfYear = 'First Half';
+          } else if (isSecondHalf && createdAt >= secondHalfStart && createdAt <= secondHalfEnd) {
+            halfYear = 'Second Half';
           } else {
-            return; // If it's not within either half, return early
+            return;
           }
-  
-          // Set periodKey and groupingKey
+
           periodKey = `${monthName} ${year}`;
           groupingKey = `${month}-${year}`;
-  
+
+          const quarter = getQuarter(month);
+          if (!quarterlySummaries[quarter]) {
+            quarterlySummaries[quarter] = {
+              ownedSiteRevenue: 0,
+              tradedSiteRevenue: 0,
+              totalRevenue: 0,
+              tradedMargin: 0,
+              operationalCosts: { electricity: 0, licenseFee: 0, rental: 0, misc: 0 },
+              tradedPurchaseCost: 0,
+              grossRevenueOwned: 0,
+              grossRevenueTraded: 0,
+            };
+          }
           break;
         }
-  
+
         case 'quarterly':
           periodKey = `${createdAt.toLocaleString('default', { month: 'long' })} ${year}`;
           groupingKey = `${getQuarter(month)}-${year}-${month}`;
           break;
-  
+
         case 'monthly':
           periodKey = `${createdAt.toLocaleString('default', { month: 'long' })} ${year}`;
           groupingKey = `${month}-${year}`;
           break;
-  
+
         case 'weekly': {
           const getWeekOfMonth = date => {
             const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -216,22 +240,22 @@ const MediaWiseReport = () => {
             const firstDayOfWeek = firstDayOfMonth.getDay();
             return Math.ceil((dayOfMonth + firstDayOfWeek) / 7);
           };
-  
+
           const weekOfMonth = getWeekOfMonth(createdAt);
           periodKey = `Week ${weekOfMonth}, ${monthName} ${year}`;
           groupingKey = `week-${weekOfMonth}-${today.getMonth()}-${year}`;
           break;
         }
-  
+
         case 'customDate':
           periodKey = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
           groupingKey = `custom-${startDate}-${endDate}`;
           break;
-  
+
         default:
           periodKey = '-';
       }
-  
+
       if (!groupedData[groupingKey]) {
         groupedData[groupingKey] = {};
       }
@@ -254,20 +278,20 @@ const MediaWiseReport = () => {
           totalRevenue: 0,
         };
       }
-  
+
       let totalPrice = 0;
       let totalTradedAmount = 0;
       const totalAmount = booking.totalAmount || 0;
-  
+
       groupedData[groupingKey][clientType].totalRevenue += totalAmount / 100000;
-  
+
       const spaces = booking.details[0]?.campaign?.spaces || [];
-  
+
       if (Array.isArray(spaces)) {
         spaces.forEach(space => {
           totalTradedAmount += (space.tradedAmount || 0) / 100000;
           totalPrice += (space.basicInformation?.price || 0) / 100000;
-  
+
           if (totalTradedAmount === 0) {
             groupedData[groupingKey][clientType].ownedSiteRevenue += totalPrice;
             groupedData[groupingKey][clientType].grossRevenueOwned += totalPrice;
@@ -284,7 +308,7 @@ const MediaWiseReport = () => {
         booking.operationalCosts.forEach(cost => {
           const amount = (cost.amount || 0) / 100000;
           const typeName = cost.type?.name;
-  
+
           if (typeName) {
             switch (typeName) {
               case 'Electricity':
@@ -306,14 +330,14 @@ const MediaWiseReport = () => {
         });
       }
     });
-  
+
     const finalData = [];
     const orderedGroupingKeys = Object.keys(groupedData).sort((a, b) => {
       const aParts = a.split('-');
       const bParts = b.split('-');
       return parseInt(aParts[0]) - parseInt(bParts[0]) || aParts[1].localeCompare(bParts[1]);
     });
-  
+
     orderedGroupingKeys.forEach(groupingKey => {
       clientTypes.forEach(clientType => {
         if (!groupedData[groupingKey][clientType]) {
@@ -337,18 +361,46 @@ const MediaWiseReport = () => {
         }
         finalData.push(groupedData[groupingKey][clientType]);
       });
+
+      const monthIndex = parseInt(groupingKey.split('-')[0]);
+      if (filter === 'yearly' && (monthIndex === 5 || monthIndex === 8 || monthIndex === 11)) {
+        const quarter = getQuarter(monthIndex);
+        finalData.push({
+          period: `${quarter} Sales`,
+          clientType: '',
+          ownedSiteRevenue: quarterlySummaries[quarter].ownedSiteRevenue.toFixed(2),
+          tradedSiteRevenue: quarterlySummaries[quarter].tradedSiteRevenue.toFixed(2),
+          totalRevenue: quarterlySummaries[quarter].totalRevenue.toFixed(2),
+          tradedMargin: quarterlySummaries[quarter].tradedMargin.toFixed(2),
+          operationalCosts: {
+            electricity: quarterlySummaries[quarter].operationalCosts.electricity.toFixed(2),
+            licenseFee: quarterlySummaries[quarter].operationalCosts.licenseFee.toFixed(2),
+            rental: quarterlySummaries[quarter].operationalCosts.rental.toFixed(2),
+            misc: quarterlySummaries[quarter].operationalCosts.misc.toFixed(2),
+          },
+          tradedPurchaseCost: quarterlySummaries[quarter].tradedPurchaseCost.toFixed(2),
+          grossRevenueOwned: quarterlySummaries[quarter].grossRevenueOwned.toFixed(2),
+          grossRevenueTraded: quarterlySummaries[quarter].grossRevenueTraded.toFixed(2),
+        });
+      }
+
+      if (
+        filter === 'halfYearly' &&
+        (monthIndex === 5 || monthIndex === 8 || monthIndex === 11 || monthIndex === 2)
+      ) {
+        const quarter = getQuarter(monthIndex);
+        finalData.push({
+          period: `${quarter} Sales`,
+          clientType: '',
+          ...quarterlySummaries[quarter],
+        });
+      }
     });
-  
+
     return finalData.map((data, index, array) => {
       const previousData = array[index - 1];
-  
-      const formatValue = value => {
-        if (!Number.isFinite(value) || value === 0) {
-          return '-';
-        }
-        return value.toFixed(2);
-      };
-  
+      const formatValue = value => (Number.isFinite(value) ? value.toFixed(2) : '-');
+
       if (!previousData || previousData.period !== data.period) {
         return {
           ...data,
@@ -387,11 +439,10 @@ const MediaWiseReport = () => {
       }
     });
   };
-  
+
   const yearlyData = useMemo(() => {
     return prepareYearlyData(filteredData);
   }, [filteredData]);
-
   const onDateChange = val => {
     setStartDate(val[0]);
     setEndDate(val[1]);
@@ -409,83 +460,83 @@ const MediaWiseReport = () => {
     setActiveView(value);
   };
 
-  const tableSalesData = yearlyData; // Your sales data
+  const tableSalesData = yearlyData;
   const tableSalesColumns = useMemo(
     () => [
       {
-        Header: 'PERIOD',
+        Header: 'Period',
         accessor: 'period',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'CLIENT TYPE',
+        Header: 'Client Type',
         accessor: 'clientType',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value || '-'}</p>,
       },
       {
-        Header: 'OWNED SITE REVENUE',
+        Header: 'Owned Site Revenue',
         accessor: 'ownedSiteRevenue',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'TRADED SITE REVENUE',
+        Header: 'Traded Site Revenue',
         accessor: 'tradedSiteRevenue',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'OPERATIONAL COSTS (ELECTRICITY)',
+        Header: 'Operational Costs (Electricity)',
         accessor: 'operationalCosts.electricity',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'OPERATIONAL COSTS (LICENSE FEE)',
+        Header: 'Operational Costs (License Fee)',
         accessor: 'operationalCosts.licenseFee',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'OPERATIONAL COSTS (RENTAL)',
+        Header: 'Operational Costs (Rental)',
         accessor: 'operationalCosts.rental',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'OPERATIONAL COSTS (MISC)',
+        Header: 'Operational Costs (Misc)',
         accessor: 'operationalCosts.misc',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'TRADED PURCHASE COST',
+        Header: 'Traded Purchase Cost',
         accessor: 'tradedPurchaseCost',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'TRADED MARGIN',
+        Header: 'Traded Margin',
         accessor: 'tradedMargin',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'GROSS REVENUE (OWNED)',
+        Header: 'Gross Revenue (Owned)',
         accessor: 'grossRevenueOwned',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'GROSS REVENUE (TRADED)',
+        Header: 'Gross Revenue (Traded)',
         accessor: 'grossRevenueTraded',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
       },
       {
-        Header: 'TOTAL REVENUE',
+        Header: 'Total Revenue',
         accessor: 'totalRevenue',
         disableSortBy: true,
         Cell: ({ value }) => <p>{value}</p>,
@@ -494,22 +545,14 @@ const MediaWiseReport = () => {
     [],
   );
 
-  // Hook for table state
-  const tableInstance = useTable({
-    columns: tableSalesColumns,
-    data: tableSalesData,
-  });
-
-  // Destructure properties from tableInstance
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = tableInstance;
-
   return (
-    <div className="col-span-12 lg:col-span-10 border-gray-450 overflow-y-auto">
-      <div className="p-5 w-[50rem]">
+    <div className="col-span-12 lg:col-span-10 border-gray-450 overflow-auto">
+      <div className="p-5 w-[50rem] ">
         <p className="font-bold pb-4">Sales Overview</p>
         <p className="text-sm text-gray-600 italic pb-4">
-          This report summarizes sales performance across various metrics and timeframes
-        </p>
+              
+This report summarizes sales performance across various metrics and timeframes
+            </p>
         <div className="flex">
           <div>
             <Menu shadow="md" width={130}>
@@ -551,76 +594,16 @@ const MediaWiseReport = () => {
           </div>
         )}
       </div>
-
-      {/* <div className="h-[400px] overflow-auto "> */}
-      <div className="min-h-[450px] flex flex-col justify-between px-5">
-        <div className="overflow-auto max-h-[400px]">
-          <table className="w-full">
-            <thead className="bg-gray-100 sticky top-0 z-10">
-              {headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                  {headerGroup.headers.map(header => (
-                    <th
-                      className={classNames(
-                        'text-sm sticky top-0 z-10 bg-gray-100 text-center',
-                        'w-28',
-                      )}
-                      {...header.getHeaderProps()}
-                    >
-                      <div className="w-max flex align-center text-left pl-2 text-gray-400 hover:text-black py-2 text-xs font-medium">
-                        <div className="w-fit tracking-wide">{header.render('Header')}</div>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {rows.map((row, index) => {
-                prepareRow(row);
-
-                const isEndOfMonthGroup = (index + 1) % 4 === 0;
-                const rowBackgroundClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-200';
-
-                return (
-                  <React.Fragment key={index}>
-                    <tr
-                      className={classNames(
-                        'text-left border-l-0 hover:bg-gray-50',
-                        rowBackgroundClass,
-                        row.original?.peerId && row.original.peerId !== userId && 'has-peer',
-                        row.original.isActive === false ? 'opacity-50' : '',
-                        'table-row',
-                      )}
-                      {...row.getRowProps()}
-                    >
-                      {row.cells.map(cell => (
-                        <td className="p-2" {...cell.getCellProps()}>
-                          <div className="w-max">{cell.render('Cell')}</div>
-                        </td>
-                      ))}
-                    </tr>
-
-                    {isEndOfMonthGroup && (
-                      <tr>
-                        <td
-                          colSpan={headerGroups[0].headers.length}
-                          className="border-t-2 border-gray-500"
-                        ></td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {rows.length <= 0 ? <div className="mx-auto">No data available</div> : null}
+      <div className=" h-[400px] overflow-auto px-5 ">
+        <Table
+          data={tableSalesData}
+          COLUMNS={tableSalesColumns}
+          showPagination={false}
+          loading={isLoadingBookingData}
+        />
       </div>
     </div>
-
-    // </div>
   );
 };
 
-export default MediaWiseReport;
+export default MediaWiseReport2;
