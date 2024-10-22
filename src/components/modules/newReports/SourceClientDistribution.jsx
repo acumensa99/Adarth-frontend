@@ -20,9 +20,7 @@ import {
   LogarithmicScale,
   Chart,
 } from 'chart.js';
-import { useBookingsNew, useUserSalesByUserId } from '../../../apis/queries/booking.queries';
-import { financialEndDate, financialStartDate, monthsInShort } from '../../../utils';
-import useUserStore from '../../../store/user.store';
+import { useBookingsNew } from '../../../apis/queries/booking.queries';
 ChartJS.register(
   ArcElement,
   Tooltip,
@@ -141,9 +139,6 @@ const SourceClientDistribution = () => {
     [bookingData],
   );
 
-  const showOwnSites = ownSiteRevenue > 0;
-  const showTradedSites = tradedSiteRevenue > 0;
-
   const printSitesData = useMemo(
     () => ({
       labels: ['Own Sites', 'Traded Sites'], // Chart labels for the legend
@@ -162,28 +157,19 @@ const SourceClientDistribution = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      radius: '80%',
       plugins: {
         datalabels: {
-          color: '#333',
-          formatter: value => `${value} L`,
+          formatter: value => {
+            return value >= 1 ? Math.floor(value) : value.toFixed(1);
+          },
+          color: '#000',
           anchor: 'end',
           align: 'end',
-          offset: 20,
-        },
-        customLines: true,
-      },
-      layout: {
-        padding: {
-          top: 70,
-          bottom: 70,
+          offset: 2,
+          // This keeps the data labels unaffected by chart size adjustments
         },
       },
-      elements: {
-        arc: {
-          borderWidth: 1,
-        },
-      },
-      cutout: '65%',
     },
   };
   const aggregatedData = useMemo(() => {
@@ -243,20 +229,24 @@ const SourceClientDistribution = () => {
   }, [pieChartData, bookingData]);
   return (
     <div className="flex flex-col md:flex-row">
-        <div className="flex flex-col p-6  min-h-[200px] gap-4">
-          <p className="font-bold">Source Distribution</p>
-          <p className="text-sm text-gray-600 italic">
-            This chart shows the revenue split between "Own Sites" and "Traded Sites".
-          </p>
-          {ownSiteRevenue === 0 && tradedSiteRevenue === 0 ? (
-            <p className="text-center">NA</p>
+      <div className="flex flex-col p-6  min-h-[200px] gap-4">
+        <p className="font-bold">Source Distribution</p>
+        <p className="text-sm text-gray-600 italic">
+          This chart shows the revenue split between "Own Sites" and "Traded Sites".
+        </p>
+        <div className=" w-48">
+          {isLoadingBookingData ? (
+            <Loader className="mx-auto" />
           ) : (
-            <div className="w-72 m-6">
-              <Doughnut  height={200}
-                  width={200} options={config} data={printSitesData} plugins={[ChartDataLabels]} />
-            </div>
+            <Doughnut
+              options={config.options}
+              data={printSitesData}
+              ref={chartRef}
+              plugins={[ChartDataLabels, customLinesPlugin]}
+            />
           )}
         </div>
+      </div>
       <div className="flex mt-2">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-4 p-4  min-h-[200px]">
@@ -267,7 +257,7 @@ const SourceClientDistribution = () => {
             </p>
             <div className="w-72 justify-center mx-40">
               {isLoadingBookingData ? (
-                <p className="text-center">Loading...</p>
+                <Loader className="mx-auto" />
               ) : updatedClient && updatedClient.datasets[0].data.length > 0 ? (
                 <Pie
                   data={updatedClient}
