@@ -81,7 +81,7 @@ const OtherNewReports = () => {
     <div className="overflow-y-auto p-3 col-span-10 overflow-hidden">
       <div className="flex flex-end justify-end ">
         <div className="py-5 flex items-start">
-          {/* <Button
+          <Button
             leftIcon={<Download size="20" color="white" />}
             className="primary-button mx-3"
             onClick={handleDownloadPdf}
@@ -89,7 +89,7 @@ const OtherNewReports = () => {
             disabled={isDownloadPdfLoading}
           >
             Download PDF
-          </Button> */}
+          </Button>
         </div>
         <div className="py-5 flex items-start">
           <Button
@@ -117,7 +117,7 @@ const OtherNewReports = () => {
         <CategoryWiseReport />
         <SalesOverview />
       </div>
-      <div className="border-2 p-5 border-black my-2">
+      {/* <div className="border-2 p-5 border-black my-2">
         <p className="font-bold text-lg"> Trends </p>
         <TagwiseReport />
         <SalesDistribution />
@@ -146,7 +146,7 @@ const OtherNewReports = () => {
           table.
         </p>
         <PerformanceCard />
-      </div>
+      </div> */}
     </div>
   );
 };
