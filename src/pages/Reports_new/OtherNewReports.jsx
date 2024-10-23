@@ -111,11 +111,11 @@ const OtherNewReports = () => {
         <RevenueCards />
 
         <ProposalDetails />
-        <SourceClientDistribution />
+        {/* <SourceClientDistribution />
         <RevenueDistribution />
         <RevenueAndIndustriGraph />
         <CategoryWiseReport />
-        <SalesOverview />
+        <SalesOverview /> */}
       </div>
       {/* <div className="border-2 p-5 border-black my-2">
         <p className="font-bold text-lg"> Trends </p>
